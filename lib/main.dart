@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jun/components/jun_themes.dart';
+import 'package:jun/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: JunThemes.lightTheme,
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomePage(),
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: child!,
@@ -53,10 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            Text(
-              '$_counter',
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 40),
-            ),
+            Text('$_counter', style: Theme.of(context).textTheme.headline4),
           ],
         ),
       ),
