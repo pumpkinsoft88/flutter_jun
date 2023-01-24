@@ -7,6 +7,7 @@ import 'package:jun/components/jun_colors.dart';
 import 'package:jun/components/jun_constants.dart';
 import 'package:jun/components/jun_widgets.dart';
 
+import '../services/add_medicine_service.dart';
 import 'add_medicine/components/add_page_widget.dart';
 
 class AddAlarmPage extends StatefulWidget {
@@ -21,11 +22,7 @@ class AddAlarmPage extends StatefulWidget {
 }
 
 class _AddAlarmPageState extends State<AddAlarmPage> {
-  final _alarms = <String>{
-    '08:00',
-    '13:00',
-    '19:00',
-  };
+  final service = AddMedicineService();
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +38,6 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
           Expanded(
             child: ListView(
               children: alarmWidgets,
-              // children: const [
-              //   AlarmBox(),
-              //   AlarmBox(),
-              //   AlarmBox(),
-              //   AlarmBox(),
-              //   AlarmBox(),
-              //   AddAlarmButton(),
-              // ],
             ),
           )
         ],
@@ -62,26 +51,16 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
 
   List<Widget> get alarmWidgets {
     final children = <Widget>[];
-    children.addAll(_alarms
+    children.addAll(service.alrams
         .map(
           (alarmTime) => AlarmBox(
             time: alarmTime,
-            onPressedMinus: () {
-              setState(() {
-                _alarms.remove(alarmTime);
-              });
-            },
+            service: service,
           ),
         )
         .toList());
     children.add(AddAlarmButton(
-      onPressed: () {
-        final now = DateTime.now();
-        final nowTime = DateFormat('HH:mm').format(now);
-        setState(() {
-          _alarms.add(nowTime);
-        });
-      },
+      service: service,
     ));
     return children;
   }
@@ -91,11 +70,11 @@ class AlarmBox extends StatelessWidget {
   const AlarmBox({
     Key? key,
     required this.time,
-    required this.onPressedMinus,
+    required this.service,
   }) : super(key: key);
 
   final String time;
-  final VoidCallback onPressedMinus;
+  final AddMedicineService service;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +85,9 @@ class AlarmBox extends StatelessWidget {
         Expanded(
           flex: 1,
           child: IconButton(
-            onPressed: onPressedMinus,
+            onPressed: () {
+              service.removeAlarm(time);
+            },
             icon: const Icon(CupertinoIcons.minus_circle),
           ),
         ),
@@ -195,10 +176,10 @@ class TimePickerBottomSheet extends StatelessWidget {
 class AddAlarmButton extends StatelessWidget {
   const AddAlarmButton({
     Key? key,
-    required this.onPressed,
+    required this.service,
   }) : super(key: key);
 
-  final VoidCallback onPressed;
+  final AddMedicineService service;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +187,7 @@ class AddAlarmButton extends StatelessWidget {
       style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
           textStyle: Theme.of(context).textTheme.subtitle1),
-      onPressed: onPressed,
+      onPressed: service.addNowAlarm,
       child: Row(
         children: const [
           Expanded(flex: 1, child: Icon(CupertinoIcons.plus_circle_fill)),
