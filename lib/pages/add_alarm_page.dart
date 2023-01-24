@@ -10,18 +10,13 @@ import 'package:jun/components/jun_widgets.dart';
 import '../services/add_medicine_service.dart';
 import 'add_medicine/components/add_page_widget.dart';
 
-class AddAlarmPage extends StatefulWidget {
-  const AddAlarmPage(
+class AddAlarmPage extends StatelessWidget {
+  AddAlarmPage(
       {super.key, required this.medicineImage, required this.medicineName});
 
   final File? medicineImage;
   final String medicineName;
 
-  @override
-  State<AddAlarmPage> createState() => _AddAlarmPageState();
-}
-
-class _AddAlarmPageState extends State<AddAlarmPage> {
   final service = AddMedicineService();
 
   @override
@@ -36,8 +31,13 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
           ),
           const SizedBox(height: largeSpace),
           Expanded(
-            child: ListView(
-              children: alarmWidgets,
+            child: AnimatedBuilder(
+              animation: service,
+              builder: (context, _) {
+                return ListView(
+                  children: alarmWidgets,
+                );
+              },
             ),
           )
         ],
@@ -78,8 +78,6 @@ class AlarmBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initTime = DateFormat('HH:mm').parse(time);
-
     return Row(
       children: [
         Expanded(
@@ -102,7 +100,8 @@ class AlarmBox extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return TimePickerBottomSheet(
-                    initialDateTime: initTime,
+                    initialTime: time,
+                    service: service,
                   );
                 },
               );
@@ -116,21 +115,28 @@ class AlarmBox extends StatelessWidget {
 }
 
 class TimePickerBottomSheet extends StatelessWidget {
-  const TimePickerBottomSheet({
+  TimePickerBottomSheet({
     Key? key,
-    required this.initialDateTime,
+    required this.initialTime,
+    required this.service,
   }) : super(key: key);
 
-  final DateTime initialDateTime;
+  final String initialTime;
+  final AddMedicineService service;
+  DateTime? _setDateTime;
 
   @override
   Widget build(BuildContext context) {
+    final initialDateTime = DateFormat('HH:mm').parse(initialTime);
+
     return BottomoSheetBody(
       children: [
         SizedBox(
           height: 200,
           child: CupertinoDatePicker(
-            onDateTimeChanged: (dateTime) {},
+            onDateTimeChanged: (dateTime) {
+              _setDateTime = dateTime;
+            },
             mode: CupertinoDatePickerMode.time,
             initialDateTime: initialDateTime,
           ),
@@ -148,7 +154,7 @@ class TimePickerBottomSheet extends StatelessWidget {
                         foregroundColor: JunColors.primaryColor,
                         textStyle: Theme.of(context).textTheme.subtitle1,
                         backgroundColor: Colors.white),
-                    onPressed: () {},
+                    onPressed: () => Navigator.pop(context),
                     child: const Text('취소')),
               ),
             ),
@@ -162,7 +168,13 @@ class TimePickerBottomSheet extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       textStyle: Theme.of(context).textTheme.subtitle1,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      service.setAlarm(
+                        prevTime: initialTime,
+                        setTime: _setDateTime ?? initialDateTime,
+                      );
+                      Navigator.pop(context);
+                    },
                     child: const Text('선택')),
               ),
             ),
